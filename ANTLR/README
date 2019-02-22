@@ -1,0 +1,77 @@
+===============================================================================
+===============================================================================
+================================== Tema 1 LFA =================================
+============================== Costea Mihai 332CB =============================
+===============================================================================
+===============================================================================
+
+Jflex:
+
+Toata implementarea a fost facuta in fisierul de parsare (Parser.flex).
+M-am folosit de tokenele definite pentru a imlementa algoritmul Shunting-yard.
+
+Am un stack de operatori pentru algoritm si un stack de noduri de valori.
+Pe masura ce consum din input stackul de operatori si stackul de noduri de valori
+se modifica ca sa se pastreze precedenta conform algoritmului Shunting-yard.
+
+Pentru cazuri in care aveam de aface cu paranteze imi notez cand incepe o paranteza
+o pun in stack-ul de operatori si dupa cand se inchide atunci trebuie sa execut
+tot ce este in paranteza si o incapsulez cu un nod de bracket care va ajunge in
+stiva de noduri de valori.
+
+Algoritmul cel mare prezinta si o lista de liste de instructiuni. De fiecare data
+cand incepe un block de instructiuni nou adaug o lista goala de instructiuni in
+lista de liste si o umplu cu instructiuni pana cand detectez ca se inchide block-ul,
+moment in care scot din lista de liste de instructiuni ultima lista o formatez 
+adecvat cu noduri de sequence cum scrie in cerinta si incapsulez totul intr-un 
+nodBlock pe care il adaug in ultima lista de instructiuni din lista de liste de
+instructiuni.
+
+Cand gasesc un cuvant de legatura precum if while sau else il adaug intr-o lista
+de conditii care nu e nimic mai mult decat o lista de strings. Cand se termina un
+block verific lista de conditii sa vad ce actiune ar trebui sa iau si daca e cazul
+scot din lista de liste de instructiuni unul sau 2 blocuri dupa nevoie (cazul lui 
+while sau if) si le incapsulez intr-un block adecvat impreuna cu ultima valoare
+din stack-ul de noduri de valori care va ajunge in ultima lista din lista de liste
+de instructiuni. 
+
+Dupa ce am consumat tot inputul se executa rule-ul pecial <<EOF>> care imi va
+scrie in fisier arborele si il va interpreta. Mai intai se genereaza arborele 
+sintactic. Dupa care se analizeaza la compilare (nu e compilare ca nu compileaza
+nimic dar intelegi ideea) daca exista sau nu variabile care nu sunt initiate.
+Dupa care se interpreteaza arborele si se returneaza orice eroare cum ar fi
+folosirea unei variabile neinitiate sau impartirea la 0.
+
+
+===============================================================================
+===============================================================================
+
+ANTLR:
+
+Ca sa se poata compila tema ar trebui ca masina pe care se executa tema sa aiba
+instalat ANTLR conform [0].
+
+Nuprea e foarte mult de zis aici. Am implementat gramatica coform cu pdf-ul iar
+dupa am aplicat un visitor care extinde visitor-ul loc default si am copiat 
+efectiv scheletul main pe care l-ati pus la dispozitie.
+
+Din fericire deoarece folosim ANTLRv4 precedenta este data de ordinea in care
+pui regulile in gramatica deci nu a trebuit sa imi bat capul facand non-terminali
+ajutatori (desi poate ar fi fost educativ).
+
+e.g.
+ axpr :  axpr DIV axpr #div
+	 |  axpr PLUS axpr #plus
+	 |	OPEN axpr CLOSE #paranthesisA
+	 |  value #valueNode ; 
+
+div are o precendenta ma mare ca plus care are o precedenta mai mare ca paranthesisA
+care are o precednta mai mare ca valueNode. Bineinteles decat primele 2 sunt relevante
+deoarece s-ar putea da match la input in alta ordine. La celelalte 2 in schimb ordinea
+nu conteaza pentru ca oricum o iei nu se poate de a avea un nod de parantesisA
+inainte de un nod de valueNode sau invers. Exista o singura ordine unica in acest caz.
+
+===============================================================================
+===============================================================================
+
+[0] https://github.com/antlr/antlr4/blob/master/doc/getting-started.md
